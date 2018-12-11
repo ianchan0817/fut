@@ -2,6 +2,13 @@
 WARNING: I've review requests and this version looks as safe as stable versions for fifa18 but i might have miss something so please be careful.
 ================================================================================================================================================
 
+Install:
+yum install python3 -y
+python setup.py sdist
+yum -y install python-pip
+
+
+
 ===
 fut
 ===
