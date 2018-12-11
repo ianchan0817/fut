@@ -5,6 +5,7 @@ from .exceptions import FutError
 # config
 rc = requests.get('https://www.easports.com/fifa/ultimate-team/web-app/config/config.json').json()
 auth_url = rc['authURL']
+auth_url = 'utas.mobapp.fut.ea.com'
 pin_url = rc['pinURL']  # TODO: urls in dict?
 client_id = rc['eadpClientId']
 release_type = rc['releaseType']
