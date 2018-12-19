@@ -8,25 +8,26 @@ first_time = True
 min_margin = 500
 
 items = [
-  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 1500}
+  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 1800},
+  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000}
 ]
 
 def search_and_buy(session, item):
-  print('Going to search and buy...')
+  print('Going to search and buy ', item['asset_id'])
   results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=5,max_buy=item['buy_in'])
   print('Buy now count: ', len(results))
   for result in results:
-    print('Going to buy now...')
+    print('Buy now...')
     session.bid(result['tradeId'], item['buy_in'], fast=True)
 
 
 def search_and_bid(session, item):
-  print('Going to search and bid...')
+  print('Going to search and bid...', item['asset_id'])
   results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=5,max_price=item['buy_in'])
   print('Bid count: ', len(results), ' and check if within 1 min')
   for result in results:
     if result['expires'] <= 60:
-      print('Going to bid now...')
+      print('Bid now...')
       session.bid(result['tradeId'], item['buy_in'], fast=True)
 
 def clean_watchlist(session):
@@ -81,10 +82,10 @@ while True:
     if tradepile_count >= 95:
       print('Tradepile nearly full...')
     else:
-      search_and_buy(session, items[0])
+      search_and_buy(session, random.choice(items))
       time.sleep(1)
 
-      search_and_bid(session, items[0])
+      search_and_bid(session, random.choice(items))
       time.sleep(1)
 
       clean_watchlist(session)
