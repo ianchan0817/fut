@@ -8,25 +8,26 @@ first_time = True
 min_margin = 500
 
 items = [
-  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 1800},
-  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000}
+  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 1800, 'name': 'CAMCF'},
+  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000, 'name': 'CFCAM'},
+  {'ctype': 'player', 'asset_id': 230666, 'buy_in': 8000, 'name': 'Gabriel Jesus'}
 ]
 session = None
 item = None
 
 def search_and_set_price():
-  print('Going to search ', item['asset_id'])
-  results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=50)
+  print('Going to search ', item['name'])
+  results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=10)
   min_buy_in = item['buy_in']
   for result in results:
     if result['currentBid'] < min_buy_in and result['currentBid'] != 0:
       min_buy_in = result['currentBid']
-  item['buy_in'] = min_buy_in - 200
+  item['buy_in'] = min_buy_in
   print('set the min buy in price is ', item['buy_in'])
 
 
 def search_and_buy():
-  print('Going to search and buy ', item['asset_id'])
+  print('Going to search and buy ', item['name'])
   results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=5,max_buy=item['buy_in'])
   print('Buy now count: ', len(results))
   for result in results:
@@ -34,7 +35,7 @@ def search_and_buy():
 
 
 def search_and_bid():
-  print('Going to search and bid...', item['asset_id'])
+  print('Going to search and bid...', item['name'])
   results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=5,max_price=item['buy_in'])
   print('Bid count: ', len(results), ' and check if within 1 min')
   for result in results:
