@@ -97,7 +97,7 @@ while True:
       first_time = False
       print('   At: ', datetime.datetime.now())
 
-    session.keepalive()
+    print('You have $', session.keepalive())
     tradepile_count = len(session.tradepile())
     print('Tradepile count:', tradepile_count)
 
@@ -118,10 +118,12 @@ while True:
       time.sleep(1)
 
     clean_unassigned()
+    time.sleep(1)
+
     clean_tradepile()
     print('Time now is : ',datetime.datetime.now())
     print('----------------------------------------')
-    time.sleep(5)
+    time.sleep(10)
   except NameError:
     print('*** Session dropped ***')
     print(NameError)
