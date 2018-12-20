@@ -3,6 +3,7 @@ import datetime
 import time
 import os
 import random
+import requests
 
 first_time = True
 min_margin = 400
@@ -124,10 +125,10 @@ while True:
     print('Time now is : ',datetime.datetime.now())
     print('----------------------------------------')
     time.sleep(10)
-  except NameError:
-    print('*** Session dropped ***')
-    print(NameError)
-    print('Login again: ',datetime.datetime.now())
-    session = fut.Core(os.environ['email'], os.environ['password'], os.environ['secret'], platform="ps4")
+  except Exception as exception:
+    print('*** Exception ***')
+    print(exception)
+    requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], exception, os.environ['chat_id']))
+    # session = fut.Core(os.environ['email'], os.environ['password'], os.environ['secret'], platform="ps4")
 
 
