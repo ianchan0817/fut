@@ -5,19 +5,19 @@ import os
 import random
 
 first_time = True
-min_margin = 500
+min_margin = 400
 
 items = [
   {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 1800, 'name': 'CAMCF'},
   {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000, 'name': 'CFCAM'},
-  {'ctype': 'player', 'asset_id': 230666, 'buy_in': 8000, 'name': 'Gabriel Jesus'}
+  {'ctype': 'player', 'asset_id': 230666, 'buy_in': 6500, 'name': 'Gabriel Jesus'}
 ]
 session = None
 item = None
 
 def search_and_set_price():
   print('Going to search ', item['name'])
-  results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=10)
+  results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=50)
   min_buy_in = item['buy_in']
   for result in results:
     if result['currentBid'] < min_buy_in and result['currentBid'] != 0:
@@ -55,6 +55,13 @@ def clean_watchlist():
       session.sendToTradepile(result['id'])
 
 
+def clean_unassigned():
+  unassigned = session.unassigned()
+  print('Unassigned Count:', len(unassigned))
+  for result in unassigned:
+    session.sendToTradepile(item_id=result['id'])
+
+
 def clean_tradepile():
   relist = False
   clear = False
@@ -64,9 +71,7 @@ def clean_tradepile():
 
   for result in tradepile:
     if result['tradeState'] == None:
-      for item in items:
-        if result['resourceId'] == item['asset_id']:
-          session.sell(result['id'], bid=item['buy_in']+min_margin, buy_now=item['buy_in']+min_margin+100)
+      session.sell(result['id'], bid=result['lastSalePrice']+min_margin, buy_now=result['lastSalePrice']+min_margin+100)
 
     if result['tradeState'] == 'expired':
       relist = True
@@ -112,6 +117,7 @@ while True:
       clean_watchlist()
       time.sleep(1)
 
+    clean_unassigned()
     clean_tradepile()
     print('Time now is : ',datetime.datetime.now())
     print('----------------------------------------')
