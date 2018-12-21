@@ -11,7 +11,7 @@ min_margin = 400
 items = [
   {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 1800, 'name': 'CAMCF'},
   {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000, 'name': 'CFCAM'},
-  {'ctype': 'player', 'asset_id': 230666, 'buy_in': 6500, 'name': 'Gabriel Jesus'}
+  # {'ctype': 'player', 'asset_id': 230666, 'buy_in': 6500, 'name': 'Gabriel Jesus'}
 ]
 session = None
 item = None
@@ -29,7 +29,7 @@ def search_and_set_price():
 
 def search_and_buy():
   print('Going to search and buy ', item['name'])
-  results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=5,max_buy=item['buy_in'])
+  results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=3,max_buy=item['buy_in'])
   print('Buy now count: ', len(results))
   for result in results:
     print('Buy now...', session.bid(result['tradeId'], item['buy_in'], fast=True))
@@ -95,14 +95,19 @@ while True:
       print('Welcome to FUT!')
       print('Login: ', datetime.datetime.now()) 
       session = fut.Core(os.environ['email'], os.environ['password'], os.environ['secret'], platform="ps4")
+      print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Login ^^', os.environ['chat_id'])))
       first_time = False
       print('   At: ', datetime.datetime.now())
 
-    print('You have $', session.keepalive())
+    coins = session.keepalive()
+    print('You have $', coins)
     tradepile_count = len(session.tradepile())
     print('Tradepile count:', tradepile_count)
 
-    if tradepile_count >= 99:
+    if coins <= 10000:
+      print('No money...')
+      time.sleep(300)
+    elif tradepile_count >= 99:
       print('Tradepile nearly full...')
     else:
       item = random.choice(items)
@@ -124,11 +129,21 @@ while True:
     clean_tradepile()
     print('Time now is : ',datetime.datetime.now())
     print('----------------------------------------')
-    time.sleep(10)
+    time.sleep(20)
+
+  except fut.exceptions.ExpiredSession:
+    print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Session Expired', os.environ['chat_id'])))
+    first_time = True
+    time.sleep(1800)
+  except fut.exceptions.Captcha:
+    for x in range(0, 9):
+      print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Urgent!!!', os.environ['chat_id'])))
+    break
   except Exception as exception:
-    print('*** Exception ***')
-    print(exception)
-    requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], exception, os.environ['chat_id']))
-    # session = fut.Core(os.environ['email'], os.environ['password'], os.environ['secret'], platform="ps4")
+    print('Exception: %s' % exception)
+    print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Exception', os.environ['chat_id'])))
+    break
+
+
 
 
