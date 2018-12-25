@@ -4,14 +4,18 @@ import time
 import os
 import random
 import requests
+import math
 
 first_time = True
 min_margin = 400
+stop_bid_buy = 10000
 
 items = [
-  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 1800, 'name': 'CAMCF'},
-  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000, 'name': 'CFCAM'},
-  # {'ctype': 'player', 'asset_id': 230666, 'buy_in': 6500, 'name': 'Gabriel Jesus'}
+  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 2300, 'name': 'CAMCF'},
+  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 1900, 'name': 'CFCAM'},
+  {'ctype': 'training', 'asset_id': 5003073, 'buy_in': 900, 'name': 'CDMCM'},
+  {'ctype': 'training', 'asset_id': 5003072, 'buy_in': 1900, 'name': 'CAMCM'},
+  {'ctype': 'player', 'asset_id': 213331, 'buy_in': 2200, 'name': 'Tah'}
 ]
 session = None
 item = None
@@ -72,7 +76,9 @@ def clean_tradepile():
 
   for result in tradepile:
     if result['tradeState'] == None:
-      session.sell(result['id'], bid=result['lastSalePrice']+min_margin, buy_now=result['lastSalePrice']+min_margin+100)
+      min_sell_price = result['lastSalePrice'] + min_margin
+      min_sell_price = int(math.ceil(min_sell_price / 100.0)) * 100
+      session.sell(result['id'], bid=min_sell_price, buy_now=min_sell_price+100)
 
     if result['tradeState'] == 'expired':
       relist = True
@@ -93,7 +99,7 @@ while True:
   try:
     if first_time == True:
       print('Welcome to FUT!')
-      print('Login: ', datetime.datetime.now()) 
+      print('Login: ', datetime.datetime.now())
       session = fut.Core(os.environ['email'], os.environ['password'], os.environ['secret'], platform="ps4")
       print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Login ^^', os.environ['chat_id'])))
       first_time = False
@@ -104,7 +110,7 @@ while True:
     tradepile_count = len(session.tradepile())
     print('Tradepile count:', tradepile_count)
 
-    if coins <= 10000:
+    if coins <= stop_bid_buy:
       print('No money...')
       time.sleep(300)
     elif tradepile_count >= 99:
@@ -129,12 +135,12 @@ while True:
     clean_tradepile()
     print('Time now is : ',datetime.datetime.now())
     print('----------------------------------------')
-    time.sleep(20)
+    time.sleep(30)
 
   except fut.exceptions.ExpiredSession:
     print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Session Expired', os.environ['chat_id'])))
     first_time = True
-    time.sleep(1800)
+    time.sleep(900)
   except fut.exceptions.Captcha:
     for x in range(0, 9):
       print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Urgent!!!', os.environ['chat_id'])))
