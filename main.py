@@ -8,14 +8,15 @@ import math
 
 first_time = True
 min_margin = 400
-stop_bid_buy = 10000
+stop_bid_buy = 20000
 
 items = [
-  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 2300, 'name': 'CAMCF'},
-  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 1900, 'name': 'CFCAM'},
+  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 2100, 'name': 'CAMCF'},
+  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000, 'name': 'CFCAM'},
   {'ctype': 'training', 'asset_id': 5003073, 'buy_in': 900, 'name': 'CDMCM'},
-  {'ctype': 'training', 'asset_id': 5003072, 'buy_in': 1900, 'name': 'CAMCM'},
-  {'ctype': 'player', 'asset_id': 213331, 'buy_in': 2200, 'name': 'Tah'}
+  {'ctype': 'training', 'asset_id': 5003072, 'buy_in': 1800, 'name': 'CAMCM'},
+  {'ctype': 'training', 'asset_id': 5003113, 'buy_in': 4700, 'name': 'SHA'},
+  {'ctype': 'training', 'asset_id': 5003111, 'buy_in': 4700, 'name': 'HUN'}
 ]
 session = None
 item = None
@@ -25,9 +26,12 @@ def search_and_set_price():
   results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=50)
   min_buy_in = item['buy_in']
   for result in results:
-    if result['currentBid'] < min_buy_in and result['currentBid'] != 0:
+    if result['currentBid'] < min_buy_in and result['currentBid'] != 0 and result['expires'] <= 300:
       min_buy_in = result['currentBid']
-  item['buy_in'] = min_buy_in
+  if min_buy_in > 200:
+    item['buy_in'] = min_buy_in - 200
+  else:
+    item['buy_in'] = min_buy_in
   print('set the min buy in price is ', item['buy_in'])
 
 
