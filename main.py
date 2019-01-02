@@ -9,14 +9,17 @@ import math
 first_time = True
 min_margin = 400
 stop_bid_buy = 20000
+sleep_interval = 5
 
 items = [
-  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 2100, 'name': 'CAMCF'},
-  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 2000, 'name': 'CFCAM'},
-  {'ctype': 'training', 'asset_id': 5003073, 'buy_in': 900, 'name': 'CDMCM'},
-  {'ctype': 'training', 'asset_id': 5003072, 'buy_in': 1800, 'name': 'CAMCM'},
+  {'ctype': 'training', 'asset_id': 5003075, 'buy_in': 2500, 'name': 'CAMCF'},
+  {'ctype': 'training', 'asset_id': 5003076, 'buy_in': 1700, 'name': 'CFCAM'},
+  {'ctype': 'training', 'asset_id': 5003073, 'buy_in': 700, 'name': 'CDMCM'},
+  {'ctype': 'training', 'asset_id': 5003072, 'buy_in': 1500, 'name': 'CAMCM'},
   {'ctype': 'training', 'asset_id': 5003113, 'buy_in': 4700, 'name': 'SHA'},
-  {'ctype': 'training', 'asset_id': 5003111, 'buy_in': 4700, 'name': 'HUN'}
+  {'ctype': 'training', 'asset_id': 5003111, 'buy_in': 4700, 'name': 'HUN'},
+  {'ctype': 'training', 'asset_id': 5002005, 'buy_in': 1100, 'name': 'SSFIT'},
+  {'ctype': 'training', 'asset_id': 5002006, 'buy_in': 900, 'name': 'SGFIT'}
 ]
 session = None
 item = None
@@ -28,7 +31,7 @@ def search_and_set_price():
   for result in results:
     if result['currentBid'] < min_buy_in and result['currentBid'] != 0 and result['expires'] <= 300:
       min_buy_in = result['currentBid']
-  if min_buy_in > 200:
+  if min_buy_in > 2000:
     item['buy_in'] = min_buy_in - 200
   else:
     item['buy_in'] = min_buy_in
@@ -40,7 +43,7 @@ def search_and_buy():
   results = session.search(ctype=item['ctype'],assetId=item['asset_id'],page_size=3,max_buy=item['buy_in'])
   print('Buy now count: ', len(results))
   for result in results:
-    print('Buy now...', session.bid(result['tradeId'], item['buy_in'], fast=True))
+    print('Buy now...', session.bid(result['tradeId'], result['buyNowPrice'], fast=True))
 
 
 def search_and_bid():
@@ -122,29 +125,29 @@ while True:
     else:
       item = random.choice(items)
       search_and_set_price()
-      time.sleep(1)
+      time.sleep(sleep_interval)
 
       search_and_buy()
-      time.sleep(1)
+      time.sleep(sleep_interval)
 
       search_and_bid()
-      time.sleep(1)
+      time.sleep(sleep_interval)
 
       clean_watchlist()
-      time.sleep(1)
+      time.sleep(sleep_interval)
 
     clean_unassigned()
-    time.sleep(1)
+    time.sleep(sleep_interval)
 
     clean_tradepile()
     print('Time now is : ',datetime.datetime.now())
-    print('----------------------------------------')
-    time.sleep(30)
+    print('----------------------------------------', flush=True)
+    time.sleep(6*sleep_interval)
 
   except fut.exceptions.ExpiredSession:
     print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Session Expired', os.environ['chat_id'])))
     first_time = True
-    time.sleep(900)
+    time.sleep(600)
   except fut.exceptions.Captcha:
     for x in range(0, 9):
       print(requests.get('https://api.telegram.org/bot%s/sendMessage?text=%s&chat_id=%s' % (os.environ['telegram'], 'Urgent!!!', os.environ['chat_id'])))
